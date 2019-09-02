@@ -30,7 +30,7 @@
     <div id="myMag" > </div>
     <div id="myDir" > </div>
     <div id="myMod" class= "rotated">
-        <img id="myModimg" src="mod-front.jpeg"></img>
+        <img id="myModimg" src="https://github.com/baetis-ma/hcm5883l/blob/master/main/mod-front.jpeg?raw=true"></img>
     </div>
 
     <script>
@@ -45,9 +45,9 @@
 
       function myTilt() {
         if(thdata[traceptr-1]%360<90 || thdata[traceptr-1]%360>270){
-           document.getElementById("myModimg").src ='mod-front.jpeg';
+           document.getElementById("myModimg").src ='https://github.com/baetis-ma/hcm5883l/blob/master/main/mod-back.jpeg?raw=true';
           } else {
-           document.getElementById("myModimg").src ='mod-back.jpeg'; 
+           document.getElementById("myModimg").src ='https://github.com/baetis-ma/hcm5883l/blob/master/main/mod-front.jpeg?raw=true'; 
           }
           document.getElementById("myMod").style.transform = 
               "rotateX("+thdata[traceptr-1]+"deg)rotateZ("+pdata[traceptr-1]+"deg)";

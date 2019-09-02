@@ -22,7 +22,6 @@ static void tcp_server_task(void *pvParameters)
 {
     char rx_buffer[1500];
     char addr_str[16];
-    static float rxv[5], ryv[5], irxv[5], iryv[5];
     int addr_family;
     int ip_protocol;
     char *temp;
@@ -70,15 +69,16 @@ static void tcp_server_task(void *pvParameters)
                    sscanf(rx_buffer+strlen(http_type)+2, "%s", temp_str);
                 }
                 //return html page to socket
-                if (strcmp("index.html", temp_str) ==0 || strcmp("HTTP/1.1",temp_str) ==0 ){
-                    extern const char index_html_start[] asm("_binary_index_html_start");
-                    extern const char index_html_end[] asm("_binary_index_html_end");
+                if (strcmp("index.html", temp_str) ==0 ){
                     int pkt_buf_size = 1500;
                     int pkt_end = pkt_buf_size;
+                    extern const char index_html_start[] asm("_binary_index_html_start");
+                    extern const char index_html_end[] asm("_binary_index_html_end");
                     int html_len =  strlen(index_html_start) - strlen(index_html_end);
+                    ESP_LOGI(TAG, "made it into loop HTML html_len %d", html_len );
                     for( int pkt_ptr = 0; pkt_ptr < html_len; pkt_ptr = pkt_ptr + pkt_buf_size){
                         if ((html_len - pkt_ptr) < pkt_buf_size) pkt_end = html_len - pkt_ptr;
-                            //ESP_LOGI(TAG, "pkt_ptr %d pkt_end %d", pkt_ptr,pkt_end );
+                            ESP_LOGI(TAG, "HTML pkt_ptr %d pkt_end %d html_len %d", pkt_ptr,pkt_end,html_len );
                             send(sock, index_html_start + pkt_ptr, pkt_end, 0);
                         }
                 } else 
@@ -122,8 +122,6 @@ static void tcp_server_task(void *pvParameters)
 
 void adc_task () {
     int cnt, samp = 1, tcnt = 0;
-    uint8_t rptr, wptr;
-    uint8_t data[1];
     uint8_t regdata[256];
     while(1){
         i2c_read(I2C_MASTER_NUM, 0x03, regdata, 6); 
