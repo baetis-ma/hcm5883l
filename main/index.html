@@ -8,6 +8,10 @@
     #myDir { position:absolute;top:55%;left:35%;height:35%; width:60%; }
     #graph { position:absolute;top:45%;left:0%;height:40%; width:30%; }
     input { font-size:xx-small;}
+    #myMod { width: 200px; height: 200px; position:absolute;top:10%;left:20%; }
+    #myModimg { background-color: red; width: 200px; height: 200px; }
+    .rotated { transform: rotateX(0deg)rotateZ(0deg); }
+
 </style>
   <!-- Plotly.js -->
   <script src="https://cdn.plot.ly/plotly-latest.min.js"></script>
@@ -25,16 +29,30 @@
     <form> <input type="button" id="xx" value="On">Stop 3d plot update</form>
     <div id="myMag" > </div>
     <div id="myDir" > </div>
+    <div id="myMod" class= "rotated">
+        <img id="myModimg" src="mod-front.jpeg"></img>
+    </div>
 
     <script>
-          setInterval(function(){ getData();}  ,333);
 
+      setInterval(function(){ getData();}  ,333);
 
       document.getElementById('xx').onclick = function() {
           if(document.getElementById("xx").value === "On")
              document.getElementById("xx").value = "Off";  else 
              document.getElementById("xx").value = "On"; 
       }
+
+      function myTilt() {
+        if(thdata[traceptr-1]%360<90 || thdata[traceptr-1]%360>270){
+           document.getElementById("myModimg").src ='mod-front.jpeg';
+          } else {
+           document.getElementById("myModimg").src ='mod-back.jpeg'; 
+          }
+          document.getElementById("myMod").style.transform = 
+              "rotateX("+thdata[traceptr-1]+"deg)rotateZ("+pdata[traceptr-1]+"deg)";
+      }
+
 
       function getData() {
          console.log("print "+document.getElementById("xx").value);
@@ -91,6 +109,8 @@
 
                    traceptr++;
                }}
+
+               myTilt();
 
                document.getElementById("xmax/min").innerHTML = "xmax/min = "+xMax+"/"+xMin;
                document.getElementById("ymax/min").innerHTML = "ymax/min = "+yMax+"/"+yMin;
