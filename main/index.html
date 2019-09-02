@@ -4,9 +4,9 @@
 <style>
     body {background-color: orange;}
     h1  { text-align:center; color:red; }
-    #myMag { position:absolute;top:15%;left:30%;height:30%; width:30%; }
-    #myDir { position:absolute;top:15%;left:65%;height:30%; width:30%; }
-    #graph { position:absolute;top:50%;left:5%;height:45%; width:30%; }
+    #myMag { position:absolute;top:15%;left:35%;height:35%; width:60%; }
+    #myDir { position:absolute;top:55%;left:35%;height:35%; width:60%; }
+    #graph { position:absolute;top:45%;left:0%;height:40%; width:30%; }
     input { font-size:xx-small;}
 </style>
   <!-- Plotly.js -->
@@ -22,7 +22,7 @@
     <p id="theta">theta =  </p> 
     <p id="phi">phi =  </p> 
     <p id="graph"> </p> 
-    <form> <input type="button" id="xx" value="On">Enable bit 3 </form>
+    <form> <input type="button" id="xx" value="On">Stop 3d plot update</form>
     <div id="myMag" > </div>
     <div id="myDir" > </div>
 
@@ -58,9 +58,10 @@
                if(cntsamples >=1){
                for(x=0;x<cntsamples/4;x++) {
                    tdata[traceptr] = parseInt(DataRetArray[4*x+1],10);
+                   //switch x and y order
                    xdata[traceptr] = parseInt(DataRetArray[4*x+2],10);
-                   ydata[traceptr] = parseInt(DataRetArray[4*x+3],10);
-                   zdata[traceptr] = parseInt(DataRetArray[4*x+4],10);
+                   ydata[traceptr] = parseInt(DataRetArray[4*x+4],10);
+                   zdata[traceptr] = parseInt(DataRetArray[4*x+3],10);
 
                    //crunch crunch
                    if(xdata[traceptr] < xMin)xMin=xdata[traceptr]; 
@@ -79,29 +80,14 @@
                         ydata[traceptr]*ydata[traceptr]+zdata[traceptr]*zdata[traceptr]);
                    var xyrms = Math.sqrt(xdata[traceptr]*xdata[traceptr]+
                         ydata[traceptr]*ydata[traceptr]);
+
                    thdata[traceptr] = 57.3*Math.abs(Math.acos(zdata[traceptr]) / mdata[traceptr]);
-                   if (zdata[traceptr] > 0 && ydata[traceptr] > 0){
-                                        thdata[traceptr]=90-thdata[traceptr];}
-                   if (zdata[traceptr] > 0 && ydata[traceptr] < 0){
-                                        thdata[traceptr]=90+thdata[traceptr];}
-                   if (zdata[traceptr] < 0 && ydata[traceptr] > 0){
-                                        thdata[traceptr]=270-(thdata[traceptr]);}
-                   if (zdata[traceptr] < 0 && ydata[traceptr] < 0){
-                                        thdata[traceptr]=270+(thdata[traceptr]);}
-
                    pdata[traceptr]  = 57.3 * Math.acos(xdata[traceptr] / xyrms);
-                   if (ydata[traceptr] < 0){pdata[traceptr]=360-(pdata[traceptr]);}
-
-//  console.log("ydata "+ydata[traceptr]+" xdata "+xdata[traceptr]+"  xyrms  "+xyrms);
-//  console.log("ydata / xyrms "+ydata[traceptr]/xyrms);
-//  console.log("ydata / xyrms acos    "+57.3*Math.acos(ydata[traceptr]/xyrms));
-
-//  var temp = -1.0; console.log("acos "+temp+  "= "+57.3*Math.acos(temp));
-//  var temp = -0.5; console.log("acos "+temp+  "= "+57.3*Math.acos(temp));
-//  var temp =  0.0; console.log("acos "+temp+  "= "+57.3*Math.acos(temp));
-//  var temp =  0.5; console.log("acos "+temp+  "= "+57.3*Math.acos(temp));
-//  var temp =  1.0; console.log("acos "+temp+  "= "+57.3*Math.acos(temp));
-
+                   if (ydata[traceptr] < 0){pdata[traceptr]=360-pdata[traceptr];}
+                   var compass = "N";
+                   if(pdata[traceptr]>= 45 && pdata[traceptr]<135){compass = "E";}
+                   if(pdata[traceptr]>=135 && pdata[traceptr]>225){compass = "S";}
+                   if(pdata[traceptr]>=225 && pdata[traceptr]>315){compass = "W";}
 
                    traceptr++;
                }}
@@ -115,7 +101,7 @@
                   document.getElementById("theta").innerHTML = "theta = "
                            +thdata[traceptr-1].toFixed(2)+" degrees";
                   document.getElementById("phi").innerHTML = "phi = "
-                           +pdata[traceptr-1].toFixed(2)+" degrees";
+                           +pdata[traceptr-1].toFixed(2)+" degrees"+"  "+compass;
                }
 
                //keep the plotting data sample at samples length
@@ -161,7 +147,7 @@
                    x: x, y: y, z: z,
                    plot_bgcolor:"#aaaf", paper_bgcolor:"#a00f", opacity: 1,
                    line: { width: 6, reversescale: false } }],
-                   { responsive: true}
+                   { height:450, responsive: true}
                  );
              }
             }

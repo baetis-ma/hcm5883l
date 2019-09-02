@@ -126,12 +126,6 @@ void adc_task () {
     uint8_t data[1];
     uint8_t regdata[256];
     while(1){
-        //i2c_read(I2C_MASTER_NUM, 0x03, data, 1); regdata[0] = data[0];
-        //i2c_read(I2C_MASTER_NUM, 0x04, data, 1); regdata[1] = data[0];
-        //i2c_read(I2C_MASTER_NUM, 0x05, data, 1); regdata[2] = data[0];
-        //i2c_read(I2C_MASTER_NUM, 0x06, data, 1); regdata[3] = data[0];
-        //i2c_read(I2C_MASTER_NUM, 0x07, data, 1); regdata[4] = data[0];
-        //i2c_read(I2C_MASTER_NUM, 0x08, data, 1); regdata[5] = data[0];
         i2c_read(I2C_MASTER_NUM, 0x03, regdata, 6); 
     
         int x = 256 * regdata[0] + regdata[1]; if(regdata[0]>=128) x = x - (1 << 16);
@@ -147,7 +141,7 @@ void adc_task () {
             hmc5883l_read[hmc5883l_read_ptr++] = z;
             if(hmc5883l_read_ptr>400)hmc5883l_read_ptr=0;
         }
-        vTaskDelay(20);
+        vTaskDelay(50);
     }
 }
 
