@@ -139,7 +139,7 @@ void adc_task () {
             hmc5883l_read[hmc5883l_read_ptr++] = z;
             if(hmc5883l_read_ptr>400)hmc5883l_read_ptr=0;
         }
-        vTaskDelay(50);
+        vTaskDelay(20);
     }
 }
 
@@ -153,8 +153,10 @@ void app_main()
 
     //configure hmc5883l with i2c instructions
     uint8_t data[1];
-    data[0] = 0x18;
+    data[0] = 0x0c;
     i2c_write(I2C_MASTER_NUM, 0x00, data, 1); cycles(1);
+    data[0] = 0x20;
+    i2c_write(I2C_MASTER_NUM, 0x01, data, 1); cycles(1);
     data[0] = 0x80;
     i2c_write(I2C_MASTER_NUM, 0x02, data, 1); cycles(1);
 

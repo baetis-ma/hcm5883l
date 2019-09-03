@@ -6,7 +6,7 @@
     h1  { text-align:center; color:red; }
     #myMag { position:absolute;top:15%;left:35%;height:35%; width:60%; }
     #myDir { position:absolute;top:55%;left:35%;height:35%; width:60%; }
-    #graph { position:absolute;top:45%;left:0%;height:40%; width:30%; }
+    #graph { position:absolute;top:55%;left:0%;height:40%; width:30%; }
     input { font-size:xx-small;}
     #myMod { width: 200px; height: 200px; position:absolute;top:10%;left:20%; }
     #myModimg { background-color: red; width: 200px; height: 200px; }
@@ -26,7 +26,8 @@
     <p id="theta">theta =  </p> 
     <p id="phi">phi =  </p> 
     <p id="graph"> </p> 
-    <form> <input type="button" id="xx" value="On">Stop 3d plot update</form>
+    <form> <input type="button" id="clearcal" value="On">clear calibration </form>
+    <form> <input type="button" id="3dtoggle" value="On">Stop 3d plot update</form>
     <div id="myMag" > </div>
     <div id="myDir" > </div>
     <div id="myMod" class= "rotated">
@@ -37,10 +38,16 @@
 
       setInterval(function(){ getData();}  ,333);
 
-      document.getElementById('xx').onclick = function() {
-          if(document.getElementById("xx").value === "On")
-             document.getElementById("xx").value = "Off";  else 
-             document.getElementById("xx").value = "On"; 
+      document.getElementById('clearcal').onclick = function() {
+             xMin= 99999; xMax= -99999;
+             yMin= 99999; yMax= -99999;
+             zMin= 99999; zMax= -99999;
+      }
+
+      document.getElementById('3dtoggle').onclick = function() {
+          if(document.getElementById("3dtoggle").value === "On")
+             document.getElementById("3dtoggle").value = "Off";  else 
+             document.getElementById("3dtoggle").value = "On"; 
       }
 
       function myTilt() {
@@ -50,13 +57,13 @@
            document.getElementById("myModimg").src ='https://github.com/baetis-ma/hcm5883l/blob/master/main/mod-front.jpeg?raw=true'; 
           }
           document.getElementById("myMod").style.transform = 
-              "rotateX("+thdata[traceptr-1]+"deg)rotateZ("+pdata[traceptr-1]+"deg)";
+              "rotateX("+thdata[traceptr-1]+"deg)rotateZ("+ -1*pdata[traceptr-1]+"deg)";
       }
 
 
       function getData() {
-         console.log("print "+document.getElementById("xx").value);
-         var tempstr = "hex="+document.getElementById("xx").value;
+         console.log("print "+document.getElementById("3dtoggle").value);
+         var tempstr = "hex="+document.getElementById("3dtoggle").value;
          var xhr = new XMLHttpRequest();
          xhr.open("GET", "getData?"+tempstr, true);
          xhr.setRequestHeader("Content-Type", "application/bin");
@@ -102,7 +109,7 @@
                    thdata[traceptr] = 57.3*Math.abs(Math.acos(zdata[traceptr]) / mdata[traceptr]);
                    pdata[traceptr]  = 57.3 * Math.acos(xdata[traceptr] / xyrms);
                    if (ydata[traceptr] < 0){pdata[traceptr]=360-pdata[traceptr];}
-                   var compass = "N";
+                   if(pdata[traceptr]>=315 && pdata[traceptr]> 45){compass = "N";}
                    if(pdata[traceptr]>= 45 && pdata[traceptr]<135){compass = "E";}
                    if(pdata[traceptr]>=135 && pdata[traceptr]>225){compass = "S";}
                    if(pdata[traceptr]>=225 && pdata[traceptr]>315){compass = "W";}
@@ -112,9 +119,12 @@
 
                myTilt();
 
-               document.getElementById("xmax/min").innerHTML = "xmax/min = "+xMax+"/"+xMin;
-               document.getElementById("ymax/min").innerHTML = "ymax/min = "+yMax+"/"+yMin;
-               document.getElementById("zmax/min").innerHTML = "zmax/min = "+zMax+"/"+zMin;
+               document.getElementById("xmax/min").innerHTML = "xmax/min = "+
+                   xMax.toFixed(0)+"/"+xMin.toFixed(0);
+               document.getElementById("ymax/min").innerHTML = "ymax/min = "+
+                   yMax.toFixed(0)+"/"+yMin.toFixed(0);
+               document.getElementById("zmax/min").innerHTML = "zmax/min = "+
+                   zMax.toFixed(0)+"/"+zMin.toFixed(0);
                if (isNaN(mdata[traceptr-1]) == false){
                   document.getElementById("magnitude").innerHTML = "fieldtot = "
                            +mdata[traceptr-1].toFixed(3)+" G";
@@ -159,7 +169,7 @@
                var y = [ 0, 0,, -1, 1,,  0, 0,, ,0, ydata[traceptr-1]];
                var z = [-1, 1,,  0, 0,,  0, 0,, ,0, zdata[traceptr-1]];
 
-          if(document.getElementById("xx").value === "On"){
+          if(document.getElementById("3dtoggle").value === "On"){
                Plotly.newPlot('graph', [{
                    type: 'scatter3d',
                    mode: 'lines',
@@ -175,9 +185,13 @@
       }
 
       var x;
-      var xMin= -150; var xMax= 150; var yMin= -150; var yMax= 150; var zMin= -150; var zMax= 150;
-      var xdata = [0]; var ydata = [0]; var zdata = [0]; var mdata = [0];
-      var thdata = [0]; var pdata = [0]; var tdata = [0]; var traceptr = 0;
+      var compass = "N";
+      var xMin= 0.9 * -400; var xMax= 0.9 * 400; 
+      var yMin= 0.9 * -400; var yMax= 0.9 * 400; 
+      var zMin= 0.9 * -400; var zMax= 0.9 * 400;
+      var xdata = [0]; var ydata =  [0]; var zdata = [0]; 
+      var mdata = [0]; var thdata = [0]; var pdata = [0]; 
+      var tdata = [0]; var traceptr = 0;
       var DataRet;
       var trace1 = { x: [0], y: [0], mode: "lines+markers", 
                  line: {color:'rgb(255,0,0)', size: 1 },
