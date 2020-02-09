@@ -22,12 +22,12 @@
     <p id="xmax/min">xmax/min = / </p> 
     <p id="ymax/min">ymax/min = / </p> 
     <p id="zmax/min">zmax/min = / </p> 
-    <p id="magnitude">theta =  </p> 
+    <p id="magnitude">mag =  </p> 
     <p id="theta">theta =  </p> 
     <p id="phi">phi =  </p> 
     <p id="graph"> </p> 
-    <form> <input type="button" id="clearcal" value="On">clear calibration </form>
-    <form> <input type="button" id="3dtoggle" value="On">Stop 3d plot update</form>
+    <form> <input type="button" id="clearcal" value="cal">clear calibration </form>
+    <form> <input type="button" id="3dtoggle" value="stop3d">Stop 3d plot update</form>
     <div id="myMag" > </div>
     <div id="myDir" > </div>
     <div id="myMod" class= "rotated">
@@ -51,13 +51,15 @@
       }
 
       function myTilt() {
-        if(thdata[traceptr-1]%360<90 || thdata[traceptr-1]%360>270){
+        if(thdata[traceptr-1]%360<90 ){
            document.getElementById("myModimg").src ='https://github.com/baetis-ma/hcm5883l/blob/master/main/mod-back.jpeg?raw=true';
           } else {
            document.getElementById("myModimg").src ='https://github.com/baetis-ma/hcm5883l/blob/master/main/mod-front.jpeg?raw=true'; 
           }
           document.getElementById("myMod").style.transform = 
-              "rotateX("+thdata[traceptr-1]+"deg)rotateZ("+ -1*pdata[traceptr-1]+"deg)";
+              //"rotateX("+thdata[traceptr-1]+"deg)"+
+              //"rotateY("+thdata[traceptr-1]+"deg)"+
+	      "rotateZ("+ pdata[traceptr-1]+"deg)";
       }
 
 
@@ -103,16 +105,17 @@
                    zdata[traceptr] = zdata[traceptr] / (0.5 * (zMax - zMin));
                    mdata[traceptr] = Math.sqrt(xdata[traceptr]*xdata[traceptr]+
                         ydata[traceptr]*ydata[traceptr]+zdata[traceptr]*zdata[traceptr]);
-                   var xyrms = Math.sqrt(xdata[traceptr]*xdata[traceptr]+
-                        ydata[traceptr]*ydata[traceptr]);
 
+		   //trig conversion
                    thdata[traceptr] = 57.3*Math.abs(Math.acos(zdata[traceptr]) / mdata[traceptr]);
-                   pdata[traceptr]  = 57.3 * Math.acos(xdata[traceptr] / xyrms);
-                   if (ydata[traceptr] < 0){pdata[traceptr]=360-pdata[traceptr];}
-                   if(pdata[traceptr]>=315 && pdata[traceptr]> 45){compass = "N";}
+                   var xyrms = Math.sqrt(Math.pow((xdata[traceptr]),2) + Math.pow((ydata[traceptr]),2));
+                   pdata[traceptr]  = 57.3*Math.acos(xdata[traceptr] / xyrms);
+		   if (ydata[traceptr] < 0){pdata[traceptr]=360-pdata[traceptr];}
+
+                   if(pdata[traceptr]>=315 || pdata[traceptr]< 45){compass = "N";}
                    if(pdata[traceptr]>= 45 && pdata[traceptr]<135){compass = "E";}
-                   if(pdata[traceptr]>=135 && pdata[traceptr]>225){compass = "S";}
-                   if(pdata[traceptr]>=225 && pdata[traceptr]>315){compass = "W";}
+                   if(pdata[traceptr]>=135 && pdata[traceptr]<225){compass = "S";}
+                   if(pdata[traceptr]>=225 && pdata[traceptr]<315){compass = "W";}
 
                    traceptr++;
                }}
@@ -120,11 +123,11 @@
                myTilt();
 
                document.getElementById("xmax/min").innerHTML = "xmax/min = "+
-                   xMax.toFixed(0)+"/"+xMin.toFixed(0);
+                   xMax.toFixed(0)+"/"+xMin.toFixed(0)+"   "+xdata[traceptr-1].toFixed(2);
                document.getElementById("ymax/min").innerHTML = "ymax/min = "+
-                   yMax.toFixed(0)+"/"+yMin.toFixed(0);
+                   yMax.toFixed(0)+"/"+yMin.toFixed(0)+"   "+ydata[traceptr-1].toFixed(2);
                document.getElementById("zmax/min").innerHTML = "zmax/min = "+
-                   zMax.toFixed(0)+"/"+zMin.toFixed(0);
+                   zMax.toFixed(0)+"/"+zMin.toFixed(0)+"   "+zdata[traceptr-1].toFixed(2);
                if (isNaN(mdata[traceptr-1]) == false){
                   document.getElementById("magnitude").innerHTML = "fieldtot = "
                            +mdata[traceptr-1].toFixed(3)+" G";
@@ -165,9 +168,10 @@
                Plotly.newPlot('myMag', data, layout,{responsive: true});
                Plotly.newPlot('myDir', data1, layout1,{responsive: true});
 
-               var x = [ 0, 0,,  0, 0,, -1, 1,, ,0, xdata[traceptr-1]];
-               var y = [ 0, 0,, -1, 1,,  0, 0,, ,0, ydata[traceptr-1]];
-               var z = [-1, 1,,  0, 0,,  0, 0,, ,0, zdata[traceptr-1]];
+               var x = [ 0, 0,,  0, 0,, -1, 1,, ,0, xdata[traceptr-1],, xdata[traceptr-1],xdata[traceptr-1], 0];
+               var y = [ 0, 0,, -1, 1,,  0, 0,, ,0, ydata[traceptr-1],, 0,ydata[traceptr-1], ydata[traceptr-1]];
+               var z = [-1, 1,,  0, 0,,  0, 0,, ,0, -zdata[traceptr-1],, 0,0,0];
+               var c = [ 1,1,1,1,1,1,1,1,1,6,6,6,6,2,2,2,2];
 
           if(document.getElementById("3dtoggle").value === "On"){
                Plotly.newPlot('graph', [{
@@ -176,16 +180,18 @@
                    //line: {color:'rgb(255,0,0)', size: 1 },
                    x: x, y: y, z: z,
                    plot_bgcolor:"#aaaf", paper_bgcolor:"#a00f", opacity: 1,
-                   line: { width: 6, reversescale: false } }],
+                   line: { width: 6, color: c, reversescale: false } }],
                    { height:450, responsive: true}
                  );
              }
+
             }
          }
       }
 
       var x;
       var compass = "N";
+      var magdec = -14.08; var maginc = 66.95;
       var xMin= 0.9 * -400; var xMax= 0.9 * 400; 
       var yMin= 0.9 * -400; var yMax= 0.9 * 400; 
       var zMin= 0.9 * -400; var zMax= 0.9 * 400;
