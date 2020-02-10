@@ -1,6 +1,7 @@
 #include <string.h>
 #include <stdio.h>
 
+//#define I2C_ADDR               0x0d //hmc5883 i2c address
 #define I2C_ADDR               0x1e //hmc5883 i2c address
 #define I2C_MASTER_FREQ_HZ   500000 // max frequency of i2c clk
 #define I2C_MASTER_NUM            0 //i2c channel on ESP-WROOM-32 ESP32S

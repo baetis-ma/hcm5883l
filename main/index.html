@@ -51,15 +51,15 @@
       }
 
       function myTilt() {
-        if(thdata[traceptr-1]%360<90 ){
+        if(thxdata[traceptr-1]%360<90 ){
            document.getElementById("myModimg").src ='https://github.com/baetis-ma/hcm5883l/blob/master/main/mod-back.jpeg?raw=true';
           } else {
            document.getElementById("myModimg").src ='https://github.com/baetis-ma/hcm5883l/blob/master/main/mod-front.jpeg?raw=true'; 
           }
           document.getElementById("myMod").style.transform = 
-              //"rotateX("+thdata[traceptr-1]+"deg)"+
-              //"rotateY("+thdata[traceptr-1]+"deg)"+
-	      "rotateZ("+ pdata[traceptr-1]+"deg)";
+              //"rotateX("+ ( thxdata[traceptr-1] * Math.cos(pdata[traceptr-1]))+"deg)"+
+              //"rotateY("+ ( thxdata[traceptr-1] * Math.cos(pdata[traceptr-1]))+"deg)"+
+	      "rotateZ("+ ( pdata[traceptr-1])+"deg)";
       }
 
 
@@ -97,20 +97,23 @@
                    if(ydata[traceptr] > yMax)yMax=ydata[traceptr];
                    if(zdata[traceptr] < zMin)zMin=zdata[traceptr]; 
                    if(zdata[traceptr] > zMax)zMax=zdata[traceptr];
-                   xdata[traceptr] = xdata[traceptr] - 0.5 * (xMax + xMin);
+                   xdata[traceptr] = xdata[traceptr] - 0.5 * (xMax + xMin);   //center
                    ydata[traceptr] = ydata[traceptr] - 0.5 * (yMax + yMin);
                    zdata[traceptr] = zdata[traceptr] - 0.5 * (zMax + zMin);
-                   xdata[traceptr] = xdata[traceptr] / (0.5 * (xMax - xMin));
+                   xdata[traceptr] = xdata[traceptr] / (0.5 * (xMax - xMin)); //normalize
                    ydata[traceptr] = ydata[traceptr] / (0.5 * (yMax - yMin));
                    zdata[traceptr] = zdata[traceptr] / (0.5 * (zMax - zMin));
                    mdata[traceptr] = Math.sqrt(xdata[traceptr]*xdata[traceptr]+
                         ydata[traceptr]*ydata[traceptr]+zdata[traceptr]*zdata[traceptr]);
 
 		   //trig conversion
-                   thdata[traceptr] = 57.3*Math.abs(Math.acos(zdata[traceptr]) / mdata[traceptr]);
-                   var xyrms = Math.sqrt(Math.pow((xdata[traceptr]),2) + Math.pow((ydata[traceptr]),2));
-                   pdata[traceptr]  = 57.3*Math.acos(xdata[traceptr] / xyrms);
-		   if (ydata[traceptr] < 0){pdata[traceptr]=360-pdata[traceptr];}
+                   thxdata[traceptr] = 57.3*Math.abs(Math.acos(zdata[traceptr]) / mdata[traceptr]);
+                   thydata[traceptr] = 57.3*Math.abs(Math.acos(zdata[traceptr]) / mdata[traceptr]);
+                   //var xyrms = Math.sqrt(Math.pow((xdata[traceptr]),2) + Math.pow((ydata[traceptr]),2));
+                   pdata[traceptr]  = 90 + 57.3*Math.atan(ydata[traceptr] / xdata[traceptr]);
+		   if (xdata[traceptr] < 0){pdata[traceptr]=180+pdata[traceptr];}
+                   pdata[traceptr]  = 45 + 180 - pdata[traceptr];
+                   pdata[traceptr]  = (360 + pdata[traceptr]) % 360;
 
                    if(pdata[traceptr]>=315 || pdata[traceptr]< 45){compass = "N";}
                    if(pdata[traceptr]>= 45 && pdata[traceptr]<135){compass = "E";}
@@ -132,7 +135,8 @@
                   document.getElementById("magnitude").innerHTML = "fieldtot = "
                            +mdata[traceptr-1].toFixed(3)+" G";
                   document.getElementById("theta").innerHTML = "theta = "
-                           +thdata[traceptr-1].toFixed(2)+" degrees";
+                           +thxdata[traceptr-1].toFixed(2)+" deg"+
+                           +thydata[traceptr-1].toFixed(2)+" deg";
                   document.getElementById("phi").innerHTML = "phi = "
                            +pdata[traceptr-1].toFixed(2)+" degrees"+"  "+compass;
                }
@@ -145,7 +149,8 @@
                    ydata.splice( 0, ydata.length-maxsamples);
                    zdata.splice( 0, zdata.length-maxsamples);
                    mdata.splice( 0, mdata.length-maxsamples);
-                   thdata.splice( 0, thdata.length-maxsamples);
+                   thxdata.splice( 0, thxdata.length-maxsamples);
+                   thydata.splice( 0, thydata.length-maxsamples);
                    pdata.splice( 0, pdata.length-maxsamples);
                    traceptr = maxsamples ;
                }
@@ -157,11 +162,13 @@
                    trace3.x[x] = String(0.01 * tdata[x]);
                    trace4.x[x] = String(0.01 * tdata[x]);
                    trace5.x[x] = String(0.01 * tdata[x]);
+                   trace6.x[x] = String(0.01 * tdata[x]);
                    trace1.y[x] = String(xdata[x]);
                    trace2.y[x] = String(ydata[x]);
                    trace3.y[x] = String(zdata[x]);
-                   trace4.y[x] = String(thdata[x]);
-                   trace5.y[x] = String(pdata[x]);
+                   trace4.y[x] = String(thxdata[x]);
+                   trace5.y[x] = String(thydata[x]);
+                   trace6.y[x] = String(pdata[x]);
                }
 
                //interface to html exery plot update
@@ -192,11 +199,11 @@
       var x;
       var compass = "N";
       var magdec = -14.08; var maginc = 66.95;
-      var xMin= 0.9 * -400; var xMax= 0.9 * 400; 
-      var yMin= 0.9 * -400; var yMax= 0.9 * 400; 
-      var zMin= 0.9 * -400; var zMax= 0.9 * 400;
+      var xMin= 0.9 * -6000; var xMax= 0.9 * 6000; 
+      var yMin= 0.9 * -6000; var yMax= 0.9 * 6000; 
+      var zMin= 0.9 * -6000; var zMax= 0.9 * 6000;
       var xdata = [0]; var ydata =  [0]; var zdata = [0]; 
-      var mdata = [0]; var thdata = [0]; var pdata = [0]; 
+      var mdata = [0]; var thxdata = [0]; var thydata = [0]; var pdata = [0]; 
       var tdata = [0]; var traceptr = 0;
       var DataRet;
       var trace1 = { x: [0], y: [0], mode: "lines+markers", 
@@ -214,6 +221,9 @@
       var trace5 = { x: [0], y: [0], mode: "lines+markers", 
                  line: {color:'rgb(0,255,0)', size: 1 },
                  marker: {color:'rgb(0,255,0)', size: 3 } };
+      var trace6 = { x: [0], y: [0], mode: "lines+markers", 
+                 line: {color:'rgb(0,0,255)', size: 1 },
+                 marker: {color:'rgb(0,0,255)', size: 3 } };
 
       layout= {
             title: { text:'Acceleration', font: { size: 24, color: '#ffffff' } },
@@ -244,7 +254,7 @@
       }
 
       var data = [trace1, trace2, trace3];
-      var data1 = [trace4, trace5];
+      var data1 = [trace4, trace5, trace6];
 
     </script>
 </body>
