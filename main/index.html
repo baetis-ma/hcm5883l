@@ -125,12 +125,12 @@
 
                myTilt();
 
-               document.getElementById("xmax/min").innerHTML = "xmax/min = "+
-                   xMax.toFixed(0)+"/"+xMin.toFixed(0)+"   "+xdata[traceptr-1].toFixed(2);
-               document.getElementById("ymax/min").innerHTML = "ymax/min = "+
-                   yMax.toFixed(0)+"/"+yMin.toFixed(0)+"   "+ydata[traceptr-1].toFixed(2);
-               document.getElementById("zmax/min").innerHTML = "zmax/min = "+
-                   zMax.toFixed(0)+"/"+zMin.toFixed(0)+"   "+zdata[traceptr-1].toFixed(2);
+               document.getElementById("xmax/min").innerHTML = "xMax = "+
+                   xMax.toFixed(0)+"; xMin = "+xMin.toFixed(0)+";";
+               document.getElementById("ymax/min").innerHTML = "yMax = "+
+                   yMax.toFixed(0)+"; yMin = "+yMin.toFixed(0)+";";
+               document.getElementById("zmax/min").innerHTML = "zMax = "+
+                   zMax.toFixed(0)+"; zMin = "+zMin.toFixed(0)+";";
                if (isNaN(mdata[traceptr-1]) == false){
                   document.getElementById("magnitude").innerHTML = "fieldtot = "
                            +mdata[traceptr-1].toFixed(3)+" G";
